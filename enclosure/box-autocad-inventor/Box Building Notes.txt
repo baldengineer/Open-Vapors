@@ -1,0 +1,31 @@
+NEMA 5 model from GrabCad:  http://grabcad.com/library/industrial-grade-nema-5-15-duplex-receptacle
+
+Panel Mount OUtlet:  http://www.mouser.com/catalog/specsheets/710w0003.pdf
+http://www.mouser.com/ProductDetail/Qualtek/710W-00-03/?qs=sGAEpiMZZMv1TUPJeFpwbm7YVXuSB9VCPmF%252bPdpxbIk%3d
+
+Panel Mount Inlet:  http://www.mouser.com/ds/1/337/744w0004-10363.pdf
+http://www.mouser.com/ProductDetail/Qualtek/744W-00-04/?qs=%2fha2pyFadugrnMzDpXzlqVHEwfC3Ncj3%252b0LNy3SWGcs%252bHRzuInzr7A%3d%3d
+
+
+Understanding engineering drawings: http://www.wisc-online.com/Objects/ViewObject.aspx?ID=ENG18704
+
+Fuse Holder:  http://www1.cooperbussmann.com/pdf/6a0cf653-3423-48a4-b0d8-5b3b433e4858.pdf
+http://www.mouser.com/Search/ProductDetail.aspx?qs=jGANiKWBgci5Io4vQID5Tg%3d%3d
+
+
+
+
+Sharp Triac / SSR S216S02  http://sharp-world.com/products/device/lineup/data/pdf/datasheet/s116s02_e.pdf
+beta layout reflow controller 120v
+
+
+Dc Panel Mount:
+http://www.mouser.com/catalog/specsheets/KC-301074.pdf
+http://www.mouser.com/ProductDetail/Kobiconn/163-R123B-E/?qs=sGAEpiMZZMu2f9RNbWupYr29NQTi4RUSfGRFGZxAbjk%3d
+
+
+Terminal Blocks
+http://www.mouser.com/Search/ProductDetail.aspx?qs=nJOu%252bf4e%252bhtchGRXi4U3dQ%3d%3d
+
+
+Check out skyrocket:  http://skyrockettheband.com/video_index.html
