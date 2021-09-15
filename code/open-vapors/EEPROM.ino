@@ -81,7 +81,6 @@ void readReflowProfile() {
     }
   }
 
-
   int indexes[] = {2,10,18,26};
   for (int x=0; x < 4; x++) {
     // 2, 10, 18, 26

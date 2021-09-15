@@ -1,10 +1,46 @@
 // Specify PID control interface
-PID reflowOvenPID(&input, &output, &setpoint, kp, ki, kd, DIRECT);
+PID reflowOvenPID(&currentTemperature, &output, &setpoint, kp, ki, kd, DIRECT);
 
 void processPID(){
+  // check for state change
+  if (previous_reflowState != reflowState) {
+    previous_reflowState = reflowState;  // remember new state
+
+    tone(buzzer_pin, normal_tone, normal_duration);
+  }
+
   // Reflow oven controller state machine
   switch (reflowState) {
+    case REFLOW_STATE_THERM_FAIL:
+    // print failure to screen
+    printMenuLine("THERMAL FAIL");
+    setLCDColor(LCD_RED);
+
+    while(1) {
+      static unsigned long prev_millis = millis();
+      static bool buzz_state = true;
+      ssrOFF();
+      if (millis() - prev_millis >= 500) {
+        if (buzz_state) {
+          tone(buzzer_pin, error_tone);
+          buzz_state = false;  
+           #ifdef USE_SERIAL
+            Serial.print(F("THERMAL FAIL"));
+           #endif    
+        } else {
+          noTone(buzzer_pin);
+          buzz_state = true;
+        }
+
+        prev_millis = millis();
+      }
+    }
+
+    break;
+
     case REFLOW_STATE_IDLE:
+      ssrOFF();
+      serialLogInterval = serial_interval_idle;
       reflowStatus = REFLOW_STATUS_OFF;
     break;
 
@@ -12,8 +48,8 @@ void processPID(){
       ssrOFF();
         // We want oven relatively cool before starting
         setpoint = TEMPERATURE_ROOM;
-        if ((input <= TEMPERATURE_ROOM))
-        {
+        if (true) {
+       // if ((currentTemperature <= TEMPERATURE_ROOM)) {
           // Initialize PID control window starting time
           windowStartTime = millis();
           // Ramp up to minimum soaking temperature
@@ -26,13 +62,14 @@ void processPID(){
           // Proceed to preheat stage
           timeAtThisState = millis();
           reflowState = REFLOW_STATE_PREHEAT;
+          serialLogInterval = serial_interval_active;
         }
     break;
 
     case REFLOW_STATE_PREHEAT:
       reflowStatus = REFLOW_STATUS_ON;
       // If minimum soak temperature is achieve       
-      if (input >= currentReflowSettings[soak].tempMin) {
+      if (currentTemperature >= currentReflowSettings[soak].tempMin) {
         // If we ramped too quickly, calm the ramp down
         reflowOvenPID.SetTunings(PID_KP_SOAK, PID_KI_SOAK, PID_KD_SOAK);
         // Time for soaking stage?
@@ -49,7 +86,7 @@ void processPID(){
       // Set midpoint halfway, we're going to overshoot a little
       setpoint = ((currentReflowSettings[soak].tempMax - currentReflowSettings[soak].tempMin) / 2) + currentReflowSettings[soak].tempMin;
       // Make sure we sit at soak for long enough. Really helps with the reflow-peak
-      if (input > currentReflowSettings[soak].tempMin) {
+      if (currentTemperature > currentReflowSettings[soak].tempMin) {
         if ((millis() - timeAtThisState) > (currentReflowSettings[soak].timeMin * 1000UL)) {  
           // Proceed to reflowing state
           timeAtThisState = millis();
@@ -65,12 +102,12 @@ void processPID(){
       setpoint = currentReflowSettings[reflow].tempMax; 
 
       // compensating for overshoot
-      if (setpoint - input <= 10) {
+   /*   if (setpoint - currentTemperature <= 10.0) {
         reflowOvenPID.SetTunings(PID_KP_PREHEAT, PID_KI_PREHEAT, PID_KD_PREHEAT);
-      }
+      }*/
         
       // got our min temp, will still hit the peak by interita. 
-      if (input > currentReflowSettings[reflow].tempMin) {
+      if (currentTemperature > currentReflowSettings[reflow].tempMax) {
         // Proceed to dwell state
         timeAtThisState = millis();
         reflowState = REFLOW_STATE_DWELL; 
@@ -85,7 +122,7 @@ void processPID(){
 
       // just maintaining temp here, so conservative values
       reflowOvenPID.SetTunings(PID_KP_DWELL, PID_KI_DWELL, PID_KD_DWELL);
-      if ((input >= currentReflowSettings[reflow].tempMin) && (millis() - timeAtThisState >= 15000UL)) {
+      if ((currentTemperature >= currentReflowSettings[reflow].tempMin) && (millis() - timeAtThisState >= 15000UL)) {
         reflowState = REFLOW_STATE_COOL;
         setpoint = currentReflowSettings[cool].tempMin;          
         timeAtThisState = millis();        
@@ -106,12 +143,12 @@ void processPID(){
       // but not usually an issue
       reflowStatus = REFLOW_STATUS_OFF;      
       // If minimum cool temperature is achieve       
-      if (input <= currentReflowSettings[cool].tempMin)
+      if (currentTemperature <= currentReflowSettings[cool].tempMin)
       {
         // Retrieve current time for buzzer usage
         // TODO: Renable the buzzer code
         // also, I don't like how original code used millis()
-        buzzerPeriod = millis() + 1000;
+        //buzzerPeriod = millis() + 1000;
 
         //digitalWrite(buzzer, HIGH);
         // Turn off reflow process
@@ -125,20 +162,20 @@ void processPID(){
 
     case REFLOW_STATE_COMPLETE:
       setpoint = 0;
-      if (millis() > buzzerPeriod)
-      {
+     // if (millis() > buzzerPeriod)
+     // {
         // Turn off buzzer
         //digitalWrite(buzzer, LOW);
         // Reflow process ended
         timeAtThisState = millis();
         reflowState = REFLOW_STATE_IDLE; 
-      }
+     // }
       break;
 
     case REFLOW_STATE_ERROR:
       // If thermocouple is still not connected
       // the display code will turn the LCD red
-      if (input == THERMOCOUPLE_DISCONNECTED)
+      if (currentTemperature == THERMOCOUPLE_DISCONNECTED)
       {
         // Wait until thermocouple wire is connected
         reflowState = REFLOW_STATE_ERROR; 
@@ -170,6 +207,7 @@ void processPID(){
   }
 }
 
+
 void ssrON() {
   // don't accidentally turn on the SSR until enough time has passed after boot.
   // I forgot why I added this, but I like the idea
@@ -177,7 +215,7 @@ void ssrON() {
     flashLCDWarning();
     return;
   }
-  
+
   digitalWrite(ssrPin, HIGH);
   ssrState = true;  
 }
@@ -185,6 +223,9 @@ void ssrON() {
 void ssrOFF() {
   digitalWrite(ssrPin, LOW);
   ssrState = false;
+
+  heater_previous_millis = millis();
+  heater_previous_temp = currentTemperature;
 }
 
 

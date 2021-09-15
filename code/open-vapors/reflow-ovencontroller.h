@@ -10,7 +10,8 @@ typedef enum REFLOW_STATE{
   REFLOW_STATE_DWELL,
   REFLOW_STATE_COOL,
   REFLOW_STATE_COMPLETE,
-  REFLOW_STATE_ERROR
+  REFLOW_STATE_ERROR,
+  REFLOW_STATE_THERM_FAIL
 } 
 reflowState_t;
 
@@ -28,7 +29,14 @@ typedef enum DEBOUNCE_STATE{
 debounceState_t;
 
 // ***** CONSTANTS *****
+
 #define TEMPERATURE_ROOM 50
+
+unsigned long runaway_timeout = 30000;
+unsigned long heater_previous_millis = 0;
+float heater_previous_temp = 0.0;
+float runaway_threshold = 1.0;
+
 // These constants are here from original code
 // most have been converted to variables and
 // are stored in EEPROM
@@ -79,11 +87,13 @@ unsigned long windowStartTime;
 unsigned long nextCheck;
 unsigned long nextRead;
 unsigned long timerSoak;
-unsigned long buzzerPeriod;
+//unsigned long buzzerPeriod;
 unsigned long timeAtThisState=0;
 
 // Reflow oven controller state machine state variable
 reflowState_t reflowState;
+reflowState_t previous_reflowState;
+
 // Reflow oven controller status
 reflowStatus_t reflowStatus;
 

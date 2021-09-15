@@ -31,10 +31,10 @@ void displayStatus() {
   else {
     unsigned long currentTime;
     if (reflowState != REFLOW_STATE_IDLE)
-       currentTime= (millis()-timeAtThisState) / 1000;
+       currentTime = (millis()-timeAtThisState) / 1000;
     else
       currentTime = 0;
-    sprintf(messageBuffer,"Time Here: %lus,%d", currentTime,max_error_count);
+    sprintf(messageBuffer,"Time Here: %lus", currentTime);
 
     printMenuLine(messageBuffer);
   }
@@ -70,13 +70,12 @@ void calculateRampRate() {
 void printReflowState() {
   switch (reflowState) {
     case (REFLOW_STATE_IDLE):
-      if ((thermo_abort) || (max_error_count >0)) {
-       // printMenuLine("Na na Batman");
-        sprintf(messageBuffer, "cnt: %d - max: %d", error_counter, max_error_count);
-        printMenuLine(messageBuffer);
-      } else {
-        printMenuLine("Ready");  
-      }    
+      char msg[21];
+      rtc_update_stamp();
+      sprintf(msg, "%s (%s)", "Ready ", time_string);
+//      printMenuLine("Ready");
+//      printMenuLine(date_stamp.toChar());
+      printMenuLine(msg);
     break;
 
     case (REFLOW_STATE_START):
@@ -84,14 +83,7 @@ void printReflowState() {
     break;
 
     case(REFLOW_STATE_PREHEAT):
-        if (thermo_abort) {
-          printMenuLine("Previous aborted");
-          ssrOFF();
-          reflowState = REFLOW_STATE_IDLE;
-          reflowStatus = REFLOW_STATUS_OFF;
-        } else {
-           printMenuLine("Preheat");
-        }
+        printMenuLine("Preheat");
     break;
 
     case(REFLOW_STATE_SOAK):

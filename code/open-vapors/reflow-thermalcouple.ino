@@ -1,31 +1,26 @@
 void updateCurrentTemp() {
-	currentTemperature = readThermalcouple();
-	input = currentTemperature;
+	double currentReading = readThermalcouple();
+	if (currentReading == 0.00) {
+		#ifdef USE_SERIAL
+			#ifdef SHOW_ERROR
+				Serial.print(F("error,"));
+				Serial.println(millis());
+			#endif
+		#endif
+		currentTemperature = currentTemperature;
+	} else {
+		currentTemperature = currentReading; // don't change stored ftemperature	
+
+	}
 }
 
 float readThermalcouple() {
-	static float last_reading = 0.00;
 	float c = thermocouple.readCelsius();
 	if (c == THERMOCOUPLE_DISCONNECTED) {
       reflowState = REFLOW_STATE_ERROR;
       reflowStatus = REFLOW_STATUS_OFF;
 	}
-
-	if (isnan(c)) {
-		gotNaN = true;
-		da_error = thermocouple.readError();
-		error_counter++;
-		if (error_counter >= max_error_count)
-			max_error_count = error_counter;
-		Serial.println(F("NaN"));
-		return last_reading;
-	}
-//	error_counter = 0;
-	if (c == 0.00) {
-		Serial.println(F("dbg: 0.00"));
-	}
-	if (error_counter > 0)
-		error_counter--;
-	last_reading = c;
+	if (isnan(c))
+		return 0;
 	return c;
 }

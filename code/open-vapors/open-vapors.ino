@@ -6,12 +6,8 @@
 #include "open-vapors.h"
 #include "reflow-thermalcouple.h"
 #include <PID_v1.h>
-
-bool gotNaN = false;
-bool thermo_abort = false;
-uint8_t da_error = 0;
-int8_t error_counter = 0;
-int8_t max_error_count = 0;
+#include <Time.h>
+#include "reflow-rtc-ds3231.h"
 
 // LiquidCrystal over I2C.
 // TODO: Verify Library used, I think it was a "fast" version of the library
@@ -60,27 +56,71 @@ void setup() {
   ssrOFF();
 
   readReflowProfile();
-  // reflashes the EEPROM, should only be used on new board/chip
-  // initReflowSettings();
+  // initReflowSettings(); // reflashes the EEPROM, should only be used on new board/chip
+  ssrOFF();
+
+  if (! rtc.begin()) {
+    Serial.println(F("Couldn't find RTC"));
+    Serial.flush();
+    tone(buzzer_pin, error_tone, error_duration);
+    while(1);
+  }
+
+
+  pinMode(buzzer_pin, OUTPUT);
+  tone(buzzer_pin, normal_tone, normal_duration);
+}
+
+void serial_msg_log() {
+  #ifdef USE_SERIAL
+    long currentTime= (millis()-timeAtThisState) / 1000;
+  //  processSyncMessage();
+    rtc_update_stamp();
+    DateTime now = rtc.now();
+    // State, Temp, Target, Time
+    Serial.print(reflowState); Serial.print(F(","));
+    Serial.print(currentTemperature); Serial.print(F(","));
+    Serial.print(setpoint); Serial.print(F(","));
+    Serial.print(currentTime); Serial.print(F(","));
+    Serial.print(now.unixtime()); Serial.print(F(","));
+    Serial.print(date_string); Serial.print(F(" "));
+    Serial.print(time_string);
+    Serial.println();
+  #endif
+}
+
+void heater_watchdog() {
+  if (ssrState && (millis() - heater_previous_millis >= runaway_timeout)) {
+
+    float temperature_difference = currentTemperature - heater_previous_temp;
+    if (temperature_difference < runaway_threshold) {
+      // uh oh, bad things are happening
+      // set state to alarm
+      // shut off heater
+      ssrOFF();
+      reflowState = REFLOW_STATE_THERM_FAIL;
+    } else {
+      // the went up by threshold, so "reset" the timer
+      heater_previous_temp = currentTemperature;
+      heater_previous_millis = millis();
+    }
+  }
 }
 
 void loop() {
-  #ifdef USE_SERIAL
-    processSerial();
-  #endif // USE_SERIAL
-
   currentMillis = millis();
+  
+  processSerial();
+  heater_watchdog();
 
   if ((currentMillis - thermalcoupleMillis) >= thermalcoupleInterval) {
     updateCurrentTemp();
-    if (error_counter >= 10) {
-      ssrOFF();
-      reflowState = REFLOW_STATE_IDLE;
-      reflowStatus = REFLOW_STATUS_OFF;
-      thermo_abort = true;
-      Serial.println("Bailing...");
-    }        
     thermalcoupleMillis = currentMillis;
+  }
+
+  if ((currentMillis - serialLogMillis) >= serialLogInterval) {
+    serial_msg_log();
+    serialLogMillis = currentMillis;
   }
 
   checkSSRButton();
@@ -117,42 +157,57 @@ void checkSSRButton() {
   }
 }
 
-#ifdef USE_SERIAL
+
 void processSerial() {
+  #ifdef USE_SERIAL
   if (Serial.available() <1) return;
 
   char incomingChar = Serial.read();
   switch (incomingChar) {
     case 'I': // Enter
     case 'i':
-    enterButtonStatus = true;
+      enterButtonStatus = true;
     break;
 
     case 'M':  // Menu
     case 'm':
-    menuButtonStatus = true;
+     menuButtonStatus = true;
     break;
 
     case 'J':  // Move Up
     case 'j':
-    if (menuSelectLine > 0) {
-      menuSelectLine--;
-      } else {
-        flashLCDWarning();
-      }
-      break;
+      if (menuSelectLine > 0) {
+        menuSelectLine--;
+        } else {
+          flashLCDWarning();
+        }
+    break;
 
     case 'K': // move Down
     case 'k':
-    if (menuSelectLine < 3) {
-      menuSelectLine++;
+      if (menuSelectLine < 3) {
+        menuSelectLine++;
       } else {
-        flashLCDWarning();
+          flashLCDWarning();
       }
-      break;
+    break;
+
+    case 'T': // epoch update
+    case 't':
+      processSyncMessage();
+    break;
+
+    case '?':
+   //   rtc_update_stamp();
+   //   Serial.print(date_string); Serial.print(F(" "));
+   //   Serial.println(time_string);
+    DateTime now = rtc.now();
+    Serial.println(now.timestamp()); //.toString()
+    break;
     }
-  }
   #endif USE_SERIAL
+  }
+
 
 
 
