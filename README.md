@@ -1,36 +1,41 @@
-Open Vapors - Open Source Reflow Oven Controller
-More Information: https://www.baldengineer.com/?s=open+vapors
+# Open Vapors - Open Source Reflow Oven Controller
 
-Complete project files.
+Additional Information on [baldengineer.com]( https://www.baldengineer.com/?s=open+vapors).
 
 Key hardware pieces you'll need:
 + Toaster Oven with "Always On"
-+ 328p or 32u4 based Arduino Board (or custom controller board)
++ Custom controller board (or maybe an Arduino)
 + SSR (Recommend Crydom D2425)
 + 4-Line RGB LCD Display
 + 5 Button Keypad
 + 1 Push Button
-+ Optional: Buzzer (not yet implemented)
++ Piezo Buzzer 
 
-/code
+## /code
 Contains all of the code for the menu display and reflow controller.
 
+## /KiCad
+The revision 2 board is a significant redesign from the first board. It integrates the shift register for the LCD and implements voltage rails to massively reduce internal wiring. Headers were also position to logical places on the PCB.
 
-/controller - EAGLE
-Rev 1 (the only one I've built) and Rev 2 (with some changes).
-It is a AVR 32u4 (Arduino Leonardo) based board. Key features include
-some LCD Status lights, function specific headers, and a USB Port.
+Buzzer is optional, but now implemented. USB connection through a 0.1" (2.54mm) header to a USB-port breakout. It is only intended for serial operation.
 
-USB port was originally intended to be for re-programming firmware and for data logging.
+Recommend using ISP for programming. 
+
+Also added port for AT-09 BLE module. (Not yet implemented)
 
 
-/ enclosure
-The enclosure I made is laser cut. The top, bottom, and sides used 3mm black acrylic. The front and back panels are Black on White acrylic.
+
+## /enclosure
+Laser cut enclosure. The top, bottom, and sides used 3mm black acrylic. The front and back panels are Black on White acrylic.
 
 Originally designed in Autocad Inventor, student edition. Then exported to Adobe Illustrator (CS6 I think) files.
 
-The bottom needs to be redesigned to get more support. The SSR warps it over time.
+The bottom needs to be redesigned to get more support. ~~The SSR warps it over time.~~ After almost 5 years, it hasn't sagged anymore. I would still recommend a support around the SSR though.
 
 
-/keyapd - EAGLE
-Rev 1 of the keypad is so bad I won't post it. Just a basic board for the 5 buttons.
+## /original electronics - EAGLE
+Rev 1 was created using an EAGLE. It worked okay, but relied on a "LCD Backpack" and was not an optimized design. (LEDs in the wrong place.) 
+
+That said, it worked great for years.
+
+The original keypad is in use still. Even though the debounce caps were totally wrong.
