@@ -34,7 +34,7 @@ void displayStatus() {
        currentTime= (millis()-timeAtThisState) / 1000;
     else
       currentTime = 0;
-    sprintf(messageBuffer,"Time Here: %lus", currentTime);
+    sprintf(messageBuffer,"Time Here: %lus,%d", currentTime,max_error_count);
 
     printMenuLine(messageBuffer);
   }
@@ -70,7 +70,13 @@ void calculateRampRate() {
 void printReflowState() {
   switch (reflowState) {
     case (REFLOW_STATE_IDLE):
-      printMenuLine("Ready");
+      if ((thermo_abort) || (max_error_count >0)) {
+       // printMenuLine("Na na Batman");
+        sprintf(messageBuffer, "cnt: %d - max: %d", error_counter, max_error_count);
+        printMenuLine(messageBuffer);
+      } else {
+        printMenuLine("Ready");  
+      }    
     break;
 
     case (REFLOW_STATE_START):
@@ -78,7 +84,14 @@ void printReflowState() {
     break;
 
     case(REFLOW_STATE_PREHEAT):
-        printMenuLine("Preheat");
+        if (thermo_abort) {
+          printMenuLine("Previous aborted");
+          ssrOFF();
+          reflowState = REFLOW_STATE_IDLE;
+          reflowStatus = REFLOW_STATUS_OFF;
+        } else {
+           printMenuLine("Preheat");
+        }
     break;
 
     case(REFLOW_STATE_SOAK):

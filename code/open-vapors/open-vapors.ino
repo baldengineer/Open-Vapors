@@ -7,6 +7,12 @@
 #include "reflow-thermalcouple.h"
 #include <PID_v1.h>
 
+bool gotNaN = false;
+bool thermo_abort = false;
+uint8_t da_error = 0;
+int8_t error_counter = 0;
+int8_t max_error_count = 0;
+
 // LiquidCrystal over I2C.
 // TODO: Verify Library used, I think it was a "fast" version of the library
 LiquidTWI lcd(0);
@@ -67,6 +73,13 @@ void loop() {
 
   if ((currentMillis - thermalcoupleMillis) >= thermalcoupleInterval) {
     updateCurrentTemp();
+    if (error_counter >= 10) {
+      ssrOFF();
+      reflowState = REFLOW_STATE_IDLE;
+      reflowStatus = REFLOW_STATUS_OFF;
+      thermo_abort = true;
+      Serial.println("Bailing...");
+    }        
     thermalcoupleMillis = currentMillis;
   }
 
