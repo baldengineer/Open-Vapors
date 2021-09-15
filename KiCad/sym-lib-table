@@ -1,0 +1,4 @@
+(sym_lib_table
+  (lib (name Reflow_Control_Board_Rev_2-eagle-import)(type Legacy)(uri ${KIPRJMOD}/Reflow_Control_Board_Rev_2-eagle-import.lib)(options "")(descr ""))
+  (lib (name Reflow-Control-Board-Rev-2-rescue)(type Legacy)(uri "${KIPRJMOD}/Reflow Control Board Rev 2-rescue.lib")(options "")(descr ""))
+)
