@@ -60,7 +60,7 @@ unsigned long buttonPreviousMillis;
 unsigned long thermalcoupleMillis;
 unsigned long serialLogMillis;
 
-const int serial_interval_idle = 10000;
+const int serial_interval_idle = 1000;
 const int serial_interval_active = 1000;
 int serialLogInterval = serial_interval_idle;
 int thermalcoupleInterval = 100;

@@ -71,7 +71,7 @@ void printReflowState() {
   switch (reflowState) {
     case (REFLOW_STATE_IDLE):
       char msg[21];
-      rtc_update_stamp();
+     // rtc_update_stamp();
       sprintf(msg, "%s (%s)", "Ready ", time_string);
 //      printMenuLine("Ready");
 //      printMenuLine(date_stamp.toChar());

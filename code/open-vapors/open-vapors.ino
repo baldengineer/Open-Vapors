@@ -5,6 +5,7 @@
 #include "reflow-ovencontroller.h"
 #include "open-vapors.h"
 #include "reflow-thermalcouple.h"
+#include "ble_adapter.h"
 #include <PID_v1.h>
 #include <Time.h>
 #include "reflow-rtc-ds3231.h"
@@ -59,14 +60,29 @@ void setup() {
   // initReflowSettings(); // reflashes the EEPROM, should only be used on new board/chip
   ssrOFF();
 
+/*
   if (! rtc.begin()) {
     Serial.println(F("Couldn't find RTC"));
     Serial.flush();
     tone(buzzer_pin, error_tone, error_duration);
     while(1);
   }
+*/
 
+  // BLE Module
+  pinMode(ble_state_pin, INPUT);
+  Serial1.begin(9600);
 
+  ble_available = init_ble_module();
+
+  if (ble_available) {
+    Serial.println("BLE Ready with address");
+    Serial.println(ble_address);
+  } else {
+    Serial.println("Failed to Init BLE.");
+  }
+
+  // make the beep beep
   pinMode(buzzer_pin, OUTPUT);
   tone(buzzer_pin, normal_tone, normal_duration);
 }
@@ -75,16 +91,16 @@ void serial_msg_log() {
   #ifdef USE_SERIAL
     long currentTime= (millis()-timeAtThisState) / 1000;
   //  processSyncMessage();
-    rtc_update_stamp();
-    DateTime now = rtc.now();
+  //  rtc_update_stamp();
+   // DateTime now = rtc.now();
     // State, Temp, Target, Time
     Serial.print(reflowState); Serial.print(F(","));
     Serial.print(currentTemperature); Serial.print(F(","));
     Serial.print(setpoint); Serial.print(F(","));
     Serial.print(currentTime); Serial.print(F(","));
-    Serial.print(now.unixtime()); Serial.print(F(","));
-    Serial.print(date_string); Serial.print(F(" "));
-    Serial.print(time_string);
+    //Serial.print(now.unixtime()); Serial.print(F(",")); //rtc 
+  //  Serial.print(date_string); Serial.print(F(" "));
+  //  Serial.print(time_string);
     Serial.println();
   #endif
 }
@@ -120,6 +136,7 @@ void loop() {
 
   if ((currentMillis - serialLogMillis) >= serialLogInterval) {
     serial_msg_log();
+    send_ble_log();
     serialLogMillis = currentMillis;
   }
 
@@ -192,17 +209,19 @@ void processSerial() {
       }
     break;
 
-    case 'T': // epoch update
-    case 't':
-      processSyncMessage();
+    case 'T': // epoch update 
+    case 't': // rtc
+      //processSyncMessage();
+      Serial.println(F("Bald Dumb Dumb Deleted this..."));
     break;
 
-    case '?':
+    case '?': // RTC
    //   rtc_update_stamp();
    //   Serial.print(date_string); Serial.print(F(" "));
    //   Serial.println(time_string);
-    DateTime now = rtc.now();
-    Serial.println(now.timestamp()); //.toString()
+   // DateTime now = rtc.now();
+   // Serial.println(now.timestamp()); //.toString()
+      Serial.println(F("Bald Dumb Dumb Deleted this..."));
     break;
     }
   #endif USE_SERIAL
