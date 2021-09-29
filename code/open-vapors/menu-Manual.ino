@@ -8,7 +8,7 @@ void displayManualList() {
 		printMenuLine("Start Bacon!");
 	else {
 		printMenuLine("Stop Bacon!");
-		menuSelectLine = 0;
+	//	menuSelectLine = 0;
 	}
 
 	// Line 2: SSR On/Off

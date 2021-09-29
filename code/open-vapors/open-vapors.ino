@@ -106,6 +106,11 @@ void serial_msg_log() {
 }
 
 void heater_watchdog() {
+  if (ssrState && (currentTemperature >= max_safe_temperature)) {
+    ssrOFF();
+    reflowState = REFLOW_STATE_THERM_FAIL;
+  }
+
   if (ssrState && (millis() - heater_previous_millis >= runaway_timeout)) {
 
     int temperature_difference = abs((int)currentTemperature - (int)heater_previous_temp);

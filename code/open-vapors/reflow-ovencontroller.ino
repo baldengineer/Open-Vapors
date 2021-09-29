@@ -39,7 +39,7 @@ void processPID(){
     break;
 
     case REFLOW_STATE_IDLE:
-      ssrOFF();
+      //ssrOFF();
       serialLogInterval = serial_interval_idle;
       reflowStatus = REFLOW_STATUS_OFF;
     break;
@@ -142,7 +142,8 @@ void processPID(){
     case REFLOW_STATE_COOL:
       // should keep heater available to achieve min cool down rate
       // but not usually an issue
-      reflowStatus = REFLOW_STATUS_OFF;      
+      reflowStatus = REFLOW_STATUS_OFF;   
+      ssrOFF();   
       // If minimum cool temperature is achieve       
       if (currentTemperature <= currentReflowSettings[cool].tempMin)
       {
@@ -170,6 +171,7 @@ void processPID(){
         // Reflow process ended
         timeAtThisState = millis();
         reflowState = REFLOW_STATE_IDLE; 
+        ssrOFF();
      // }
       break;
 
@@ -185,6 +187,7 @@ void processPID(){
       {
         // Clear to perform reflow process
         reflowState = REFLOW_STATE_IDLE; 
+        ssrOFF();
       }
       break;    
   }    
