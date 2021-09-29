@@ -35,7 +35,7 @@ debounceState_t;
 unsigned long runaway_timeout = 30000;
 unsigned long heater_previous_millis = 0;
 float heater_previous_temp = 0.0;
-float runaway_threshold = 1.0;
+int runaway_threshold = 2;
 
 // These constants are here from original code
 // most have been converted to variables and

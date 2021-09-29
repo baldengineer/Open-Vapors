@@ -108,7 +108,7 @@ void serial_msg_log() {
 void heater_watchdog() {
   if (ssrState && (millis() - heater_previous_millis >= runaway_timeout)) {
 
-    float temperature_difference = currentTemperature - heater_previous_temp;
+    int temperature_difference = abs((int)currentTemperature - (int)heater_previous_temp);
     if (temperature_difference < runaway_threshold) {
       // uh oh, bad things are happening
       // set state to alarm

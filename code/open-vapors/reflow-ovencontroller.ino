@@ -84,7 +84,8 @@ void processPID(){
       // Set less agressive PID parameters for soaking ramp
       reflowOvenPID.SetTunings(PID_KP_SOAK, PID_KI_SOAK, PID_KD_SOAK);
       // Set midpoint halfway, we're going to overshoot a little
-      setpoint = ((currentReflowSettings[soak].tempMax - currentReflowSettings[soak].tempMin) / 2) + currentReflowSettings[soak].tempMin;
+      // setpoint = ((currentReflowSettings[soak].tempMax - currentReflowSettings[soak].tempMin) / 2) + currentReflowSettings[soak].tempMin;
+      setpoint = ((currentReflowSettings[soak].tempMax - currentReflowSettings[soak].tempMin)) + currentReflowSettings[soak].tempMin;
       // Make sure we sit at soak for long enough. Really helps with the reflow-peak
       if (currentTemperature > currentReflowSettings[soak].tempMin) {
         if ((millis() - timeAtThisState) > (currentReflowSettings[soak].timeMin * 1000UL)) {  
