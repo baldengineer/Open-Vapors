@@ -1,5 +1,7 @@
 # Open Vapors - Open Source Reflow Oven Controller
 
+![bald engineer's open vapors reflow controller box](images/6675571493180764312.jpg)
+
 Additional Information on [baldengineer.com]( https://www.baldengineer.com/?s=open+vapors).
 
 Key hardware pieces you'll need:
