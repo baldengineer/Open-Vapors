@@ -4,10 +4,10 @@ EELAYER END
 $Descr A3 16535 11693
 encoding utf-8
 Sheet 1 1
-Title ""
-Date ""
-Rev ""
-Comp ""
+Title "Open Vapors Reflow Controller"
+Date "2021-08-26"
+Rev "2"
+Comp "twitch.tv/baldengineer"
 Comment1 ""
 Comment2 ""
 Comment3 ""
